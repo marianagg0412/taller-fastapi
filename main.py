@@ -3,10 +3,13 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 
+load_dotenv()
 # Configuración de la base de datos
-DATABASE_URL = "postgresql://neondb_owner:qi6gXGRck8eC@ep-polished-hall-a5ys27y6.us-east-2.aws.neon.tech/airbnb?sslmode=require"
+DATABASE_URL = os.getenv("DB_URL")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

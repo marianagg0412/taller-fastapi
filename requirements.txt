@@ -39,6 +39,7 @@ watchfiles==0.24.0
 websockets==13.0.1
 sqlalchemy==1.4.31
 psycopg2==2.9.3
+python-dotenv==1.0.1
 
 
 
