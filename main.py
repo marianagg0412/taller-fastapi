@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Depends
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
@@ -88,9 +89,45 @@ def create_item(calendar: Calendar, db: Session = Depends(get_db)):
 
 
 @app.get("/calendar/", response_model=list[Calendar])
-def read_items(db: Session = Depends(get_db)):
-    items = db.query(CalendarModel).all()
-    return items
+def read_items(
+   db: Session = Depends(get_db),
+   page: int = Query(1, ge=1),  # Page number, starting from 1
+   limit: int = Query(100, le=100, ge=1),  
+   start_date: Optional[datetime] = None,  
+   end_date: Optional[datetime] = None, 
+   min_price: Optional[float] = None,  
+   max_price: Optional[float] = None,  #Query(None) differs from None in that it will be present in the query string, but with no value
+   available: Optional[str] = None,
+):
+   query = db.query(CalendarModel)
+
+   if start_date:
+       if end_date is not None and start_date > end_date:
+           raise HTTPException(status_code=400, detail="La fecha de inicio no puede ser mayor que la fecha de fin")
+       query = query.filter(CalendarModel.date >= start_date)
+   if end_date:
+       if start_date is not None and end_date < start_date:
+           raise HTTPException(status_code=400, detail="La fecha de fin no puede ser menor que la fecha de inicio")
+       query = query.filter(CalendarModel.date <= end_date)
+   if min_price is not None:
+       if min_price < 0:
+           raise HTTPException(status_code=400, detail="El precio mínimo no puede ser negativo")
+       query = query.filter(CalendarModel.price >= min_price)
+   if max_price is not None:
+       if max_price < 0:
+           raise HTTPException(status_code=400, detail="El precio máximo no puede ser negativo")
+       query = query.filter(CalendarModel.price <= max_price)
+   if available:
+       if available not in ["t", "f"]:
+           raise HTTPException(status_code=400, detail="El valor de disponibilidad debe ser 't' o 'f'")
+       query = query.filter(CalendarModel.available == available)
+   # Calculate offset for pagination
+   offset = (page - 1) * limit
+   # Apply limit and offset for pagination
+   items = query.offset(offset).limit(limit).all()
+   if not items:
+       raise HTTPException(status_code=404, detail="No hay registros en la base de datos")
+   return items
 
 if __name__ == "__main__":
     import uvicorn
