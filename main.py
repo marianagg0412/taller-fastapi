@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import FastAPI, HTTPException, Depends, Query, status
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
@@ -58,6 +58,33 @@ class Calendar(BaseModel):
 def create_item(calendar: Calendar, db: Session = Depends(get_db)):
 
     try:
+        if calendar.price < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El precio no puede ser negativo."
+            )
+
+        if calendar.minimum_nights < 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La estancia mínima no puede ser menor que 1."
+            )
+
+        if calendar.maximum_nights < calendar.minimum_nights:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La estancia máxima no puede ser menor que la estancia mínima."
+            )
+        if calendar.available not in ["t", "f"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El valor de disponibilidad debe ser 't' o 'f'."
+            )
+        if calendar.listing_id < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El ID de la lista no puede ser negativo."
+            )
 
         count_before = db.query(CalendarModel).count()
 
@@ -84,8 +111,15 @@ def create_item(calendar: Calendar, db: Session = Depends(get_db)):
             "calendar": db_calendar
         }
     except HTTPException as e:
-        return {"error": str(e),
-                "code": e.status_code}
+        # Return HTTP exception with status code and message
+        raise e
+    
+    except Exception as e:
+        # Handle any other exceptions and return a 500 error
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ocurrió un error en el servidor: " + str(e)
+        )
 
 
 @app.get("/calendar/", response_model=list[Calendar])
