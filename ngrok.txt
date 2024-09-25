@@ -13,12 +13,12 @@ Description=ngrok service
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/ngrok http 8001 --authtoken=2mZFhZXIzwAmxE9joU8Y1ZbGKwd_4LkXEhGhkAzQENLWeix51
+ExecStart=/usr/local/bin/ngrok http 8001 --authtoken=<token>
 WorkingDirectory=/mnt/c/Users/santy/Información/EIA/7 Semestre/Sistemas Operativos/taller-fastapi
 Restart=always
 User=santy_estrada
 Group=santy_estrada
-Environment="NGROK_AUTHTOKEN=2mZFhZXIzwAmxE9joU8Y1ZbGKwd_4LkXEhGhkAzQENLWeix51"
+Environment="NGROK_AUTHTOKEN=<token>"
 
 [Install]
 WantedBy=multi-user.target
