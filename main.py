@@ -144,10 +144,14 @@ def read_items(
            raise HTTPException(status_code=400, detail="La fecha de fin no puede ser menor que la fecha de inicio")
        query = query.filter(CalendarModel.date <= end_date)
    if min_price is not None:
+       if max_price is not None and min_price > max_price:
+              raise HTTPException(status_code=400, detail="El precio mínimo no puede ser mayor que el precio máximo")
        if min_price < 0:
            raise HTTPException(status_code=400, detail="El precio mínimo no puede ser negativo")
        query = query.filter(CalendarModel.price >= min_price)
    if max_price is not None:
+       if min_price is not None and max_price < min_price:
+           raise HTTPException(status_code=400, detail="El precio máximo no puede ser menor que el precio mínimo")
        if max_price < 0:
            raise HTTPException(status_code=400, detail="El precio máximo no puede ser negativo")
        query = query.filter(CalendarModel.price <= max_price)
@@ -165,4 +169,11 @@ def read_items(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+    host = os.getenv("HOST")
+    port = os.getenv("PORT")
+
+    if host is None or port is None:
+        raise RuntimeError("HOST or PORT environment variable is missing")
+
+    uvicorn.run("main:app", host=host, port=int(port), reload=True)

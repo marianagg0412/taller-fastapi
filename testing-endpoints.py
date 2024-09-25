@@ -48,6 +48,19 @@ def test_get():
         "end_date": "2020-01-01"
     })
     check_response(response, 400, "GET /calendar/ (invalid date range)")
+    
+    #Invalid availability
+    response = requests.get(f"{BASE_URL}/calendar/", params={
+        "available": "invalid"
+    })
+    check_response(response, 400, "GET /calendar/ (invalid availability)")
+    
+    #Invalid price range
+    response = requests.get(f"{BASE_URL}/calendar/", params={
+        "min_price": 200,
+        "max_price": 50
+    })
+    check_response(response, 400, "GET /calendar/ (invalid price range)")
 
 #Testing POST
 def test_post():

@@ -19,8 +19,7 @@ MarkupSafe==2.1.5
 mdurl==0.1.2
 numpy==2.1.1
 pandas==2.2.2
-psycopg2==2.9.3#Se debe tener postgresql instalado en el sistema
-#pip install --only-binary=:all: psycopg2-binary==2.9.3
+psycopg2-binary==2.9.9
 pydantic==2.9.2
 pydantic_core==2.23.4
 Pygments==2.18.0
