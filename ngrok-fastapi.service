@@ -1,13 +1,3 @@
-URL pública:
-https://7a44-191-95-36-7.ngrok-free.app/
-
-Para acceder a Swagger:
-https://7a44-191-95-36-7.ngrok-free.app/docs
-
-Pasos para crear el servicio de ngrok
-sudo nano /etc/systemd/system/ngrok-fastapi.service
-
--------------------------------------------------
 [Unit]
 Description=ngrok service
 After=network.target
@@ -22,4 +12,3 @@ Environment="NGROK_AUTHTOKEN=<token>"
 
 [Install]
 WantedBy=multi-user.target
--------------------------------------------------
