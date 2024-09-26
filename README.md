@@ -15,7 +15,7 @@
 
 ## Ejecución
 1. Cree el archivo .env y configure las variables de entorno del `DB_URL`, `PORT`, `HOST` y `BASE_URL`.
-2. Si desea probar los endpoints, ejecute main.py. En su navegador ingrese: `http://localhost:{PORT}/docs` para poder realizarlo.
+2. Si desea probar los endpoints manualmente, ejecute main.py. En su navegador ingrese: `http://localhost:{PORT}/docs` para poder realizarlo con la herramienta Swagger.
 3. Si desea realizar las pruebas, ejecutar el archivo testing-endpoints.
 4. Habilitar systemd en WSL. Ubique el archivo `fastapi_taller.service` en `/etc/systemd/system/` y
     ejecutar los comandos:
