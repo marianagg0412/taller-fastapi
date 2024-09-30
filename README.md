@@ -4,6 +4,7 @@
 - Asegúrese de clonar correctamente el proyecto de git. Se recomienda `git clone <URL>`. 
 - Su máquina debe tener python3 instalado de manera global.
 - La base de datos usada está en la nube (neontech). Los datos allí contenidos corresponden al archivo `calendar.csv`. Si se desea validar su funcionamiento, se puede ejecutar el archivo SQL `inserts.sql` en una base de datos local.
+- Debe tener instalado y configurado ngrok con su respectivo token de autorización en su máquina.
 
 ## Pasos para la instalación
 1. Instalar la librería "dos2unix" de manera global y ejecutar el comando: `dos2unix setting-up.bash`.
