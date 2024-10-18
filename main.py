@@ -4,12 +4,35 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from datetime import datetime
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 import os
+import boto3
+import json
 from dotenv import load_dotenv
+
 
 
 load_dotenv()
 # Configuración de la base de datos
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+S3_BUCKET_NAME= os.getenv("BUCKET_NAME")
+def verify_aws_credentials():
+    try:
+        s3 = boto3.client('s3', 
+                          aws_access_key_id=AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+        s3.list_buckets()  # This will raise an error if credentials are invalid
+        print("AWS credentials are valid.")
+    except (NoCredentialsError, PartialCredentialsError):
+        raise ValueError("Invalid AWS credentials. Please check your .env file.")
+    except Exception as e:
+        raise Exception(f"An error occurred while verifying AWS credentials: {e}")
+
+# Verify credentials when the app starts
+verify_aws_credentials()
+
+
 DATABASE_URL = os.getenv("DB_URL")
 
 engine = create_engine(DATABASE_URL)
@@ -17,6 +40,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 app = FastAPI()
+
+s3 = boto3.client('s3')
+
 
 
 def get_db():
@@ -102,8 +128,25 @@ def create_item(calendar: Calendar, db: Session = Depends(get_db)):
 
         count_after = db.query(CalendarModel).count()
 
+        calendar_data = {
+            "listing_id": db_calendar.listing_id,
+            "date" : str(db_calendar.date),
+            "available" : db_calendar.available,
+            "price" : db_calendar.price,
+            "minimum_nights" : db_calendar.minimum_nights,
+            "maximum_nights" : db_calendar.maximum_nights
+        }
+
+        json_data = json.dumps(calendar_data)
+
+        s3.put_object(
+            Bucket= S3_BUCKET_NAME,
+            Key = f"calendar_{db_calendar.id}.json",
+            Body = json_data
+        )
+
         return {
-            "message": "Registro agregado exitosamente",
+            "message": "Registro agregado exitosamente en el bucket",
             "new_item": db_calendar,
             "count_before": count_before,
             "count_after": count_after,
